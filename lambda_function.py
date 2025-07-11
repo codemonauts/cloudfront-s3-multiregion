@@ -48,7 +48,7 @@ def lambda_handler(event, context):  # pylint: disable=unused-argument
     """
     Entrypoint for AWS Lambda
     """
-    
+
     request = event["Records"][0]["cf"]["request"]
 
     # Fallback to FALLBACK_REGION if we can't get a region
