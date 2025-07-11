@@ -1,3 +1,8 @@
+"""
+Small AWS Lambda function to find the best bucket to serve static content
+because Cloudfront can't directly talk to an S3 multiregion access point.
+"""
+
 import os
 from config import FALLBACK_REGION, REGIONS, BASE_NAME
 
@@ -39,7 +44,11 @@ def build_bucket_name(region):
     return f"{bucket_name}.s3.{region}.amazonaws.com"
 
 
-def lambda_handler(event, context):
+def lambda_handler(event, context):  # pylint: disable=unused-argument
+    """
+    Entrypoint for AWS Lambda
+    """
+    
     request = event["Records"][0]["cf"]["request"]
 
     # Fallback to FALLBACK_REGION if we can't get a region
@@ -49,11 +58,11 @@ def lambda_handler(event, context):
 
     print(f"{current_region} got routed to {best_region}")
 
-    domainName = build_bucket_name(best_region)
+    domain_name = build_bucket_name(best_region)
 
     # Rewrite request to the newly found bucket
     request["origin"]["s3"]["region"] = best_region
-    request["origin"]["s3"]["domainName"] = domainName
-    request["headers"]["host"] = [{"key": "host", "value": domainName}]
+    request["origin"]["s3"]["domainName"] = domain_name
+    request["headers"]["host"] = [{"key": "host", "value": domain_name}]
 
     return request
